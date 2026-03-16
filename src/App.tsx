@@ -45,7 +45,7 @@ const Navbar = () => {
           <a href="#contacto" className="hover:text-[#746840] transition-colors">Contacto</a>
         </div>
         <a 
-          href="https://wa.me/244000000000" 
+          href="https://wa.me/244938325192" 
           target="_blank" 
           rel="noopener noreferrer"
           className="bg-[#746840] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#5a5132] transition-all"
@@ -200,7 +200,7 @@ const Services = () => {
               <img 
                 alt="Web Dev" 
                 className="rounded-2xl w-full h-40 object-cover grayscale group-hover:grayscale-0 transition-all" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf0BDLO4EalgLoSCiWIoAMba2N32II7EkyOqII6uNQcq-V-5Bw34X6nAA2eXvbtN45METxxH3BVljV6oVp0LKgbpAHM4mnj5lVi97H4A0t_Jvsrj441PHvl0XF4XWZ_ixr6Lx93DeHdcsV7vlNHQeLPa10RNj-Yt9BVzWPNeFgOtNoNaZPBaYypbZyc26zvuGJjMYjCzU-kxjg5co8aJsLiZEY2rEu2Aupx0XqHrUu5PHRjIz9iauZPTqc4ycb-lwoNeSgZQdx6S4W"
+                src="https://i.postimg.cc/D0rfzd3b/1773675060458.png"
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -241,7 +241,7 @@ const Services = () => {
 
 const About = () => {
   return (
-    <section id="sobre" className="py-24">
+    <section id="sobre" className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           <motion.div 
@@ -250,17 +250,44 @@ const About = () => {
             viewport={{ once: true }}
             className="lg:w-1/2"
           >
-            <h2 className="text-4xl font-bold text-slate-900 mb-6">No Coração do Morro Bento</h2>
-            <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-              Estamos estrategicamente localizados em Luanda, <strong className="text-slate-900">frente ao ENAPP</strong>. Nosso espaço foi projetado para oferecer uma experiência tecnológica premium, onde o atendimento personalizado encontra a inovação.
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-block px-4 py-1.5 bg-[#746840]/10 rounded-full mb-6"
+            >
+              <span className="text-[#746840] text-xs font-bold uppercase tracking-widest">Sobre Nós</span>
+            </motion.div>
+            <h2 className="text-4xl font-bold text-slate-900 mb-6">MXS - Soluções Tecnológicas</h2>
+            <p className="text-lg text-slate-600 mb-6 leading-relaxed">
+              A <strong className="text-slate-900">Maicol-Express</strong> (também conhecida como MXS) é uma empresa multi-serviços sediada em Luanda, Angola. Somos especialistas em oferecer soluções tecnológicas integradas que impulsionam o seu estilo de vida e o seu negócio.
             </p>
-            <div className="space-y-4">
+            <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+              Desde o retalho de eletrónicos premium até à corretoria especializada e gestão digital, o nosso compromisso é com a excelência e a satisfação total dos nossos clientes no coração do Morro Bento.
+            </p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
               <div className="flex items-start space-x-4">
-                <div className="mt-1"><MapPin className="text-[#746840] w-6 h-6" /></div>
+                <div className="p-3 bg-slate-50 rounded-2xl"><Smartphone className="text-[#746840] w-6 h-6" /></div>
                 <div>
-                  <h4 className="font-bold">Endereço</h4>
-                  <p className="text-slate-500">Morro Bento, Frente ao ENAPP, Luanda - Angola</p>
+                  <h4 className="font-bold text-slate-900">Hardware</h4>
+                  <p className="text-sm text-slate-500">iPhones, PCs & PS5</p>
                 </div>
+              </div>
+              <div className="flex items-start space-x-4">
+                <div className="p-3 bg-slate-50 rounded-2xl"><Code className="text-[#746840] w-6 h-6" /></div>
+                <div>
+                  <h4 className="font-bold text-slate-900">Digital</h4>
+                  <p className="text-sm text-slate-500">Web & Redes Sociais</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-4">
+              <div className="mt-1"><MapPin className="text-[#746840] w-6 h-6" /></div>
+              <div>
+                <h4 className="font-bold">Localização</h4>
+                <p className="text-slate-500">Morro Bento, Frente ao ENAPP, Luanda - Angola</p>
               </div>
             </div>
           </motion.div>
@@ -270,7 +297,7 @@ const About = () => {
             viewport={{ once: true }}
             className="lg:w-1/2 w-full"
           >
-            <div className="relative rounded-[2rem] overflow-hidden shadow-xl aspect-video bg-slate-200">
+            <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl aspect-square lg:aspect-video bg-slate-200 group">
               <iframe 
                 width="100%" 
                 height="100%" 
@@ -279,7 +306,9 @@ const About = () => {
                 allowFullScreen 
                 referrerPolicy="no-referrer-when-downgrade"
                 src="https://www.google.com/maps?q=Frente%20ao%20ENAPP,%20Morro%20Bento,%20Luanda&output=embed"
+                className="grayscale group-hover:grayscale-0 transition-all duration-700"
               ></iframe>
+              <div className="absolute inset-0 pointer-events-none border-[12px] border-white/10 rounded-[2.5rem]"></div>
             </div>
           </motion.div>
         </div>
@@ -381,8 +410,23 @@ const Contact = () => {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl font-bold mb-8">Pronto para o Próximo Nível?</h2>
-            <p className="text-slate-400 text-lg mb-12">Entre em contacto hoje e descubra como a Maicol-Express pode transformar a sua relação com a tecnologia.</p>
+            <p className="text-slate-400 text-lg mb-8">Entre em contacto hoje e descubra como a Maicol-Express pode transformar a sua relação com a tecnologia.</p>
             
+            <div className="flex flex-col gap-4 mb-12">
+              <a href="tel:+244938325192" className="flex items-center gap-4 text-white hover:text-[#746840] transition-colors group">
+                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#746840]/20 transition-all">
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <span className="text-lg font-medium">+244 938 325 192</span>
+              </a>
+              <div className="flex items-center gap-4 text-white">
+                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <span className="text-lg font-medium">Morro Bento, Luanda</span>
+              </div>
+            </div>
+
             <div className="bg-white/5 p-8 rounded-3xl border border-white/10">
               <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
                 <Clock className="text-[#746840]/40 w-6 h-6" />
@@ -392,11 +436,11 @@ const Contact = () => {
                 <tbody className="divide-y divide-white/10">
                   <tr>
                     <td className="py-3 text-slate-400">Segunda - Sexta</td>
-                    <td className="py-3 text-right font-medium">08:00 - 18:00</td>
+                    <td className="py-3 text-right font-medium">08:00 - 17:00</td>
                   </tr>
                   <tr>
                     <td className="py-3 text-slate-400">Sábado</td>
-                    <td className="py-3 text-right font-medium">09:00 - 14:00</td>
+                    <td className="py-3 text-right font-medium">08:00 - 14:00</td>
                   </tr>
                   <tr>
                     <td className="py-3 text-slate-400">Domingo</td>
@@ -500,13 +544,15 @@ const Footer = () => {
         
         <div className="flex space-x-6">
           {[
-            { icon: Facebook, label: 'Facebook' },
-            { icon: Instagram, label: 'Instagram' },
-            { icon: Video, label: 'TikTok' }
+            { icon: Facebook, label: 'Facebook', url: 'https://www.facebook.com/people/Miguel-BV/100088111299053/' },
+            { icon: Instagram, label: 'Instagram', url: 'https://www.instagram.com/maicolxpress.corretoria/' },
+            { icon: Video, label: 'TikTok', url: 'https://www.tiktok.com/@maicol.express' }
           ].map((social) => (
             <a 
               key={social.label}
-              href="#" 
+              href={social.url} 
+              target="_blank"
+              rel="noopener noreferrer"
               aria-label={social.label}
               className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#746840] hover:text-white transition-all transform hover:-translate-y-1"
             >
@@ -534,7 +580,7 @@ export default function App() {
       
       {/* Floating WhatsApp Button */}
       <a 
-        href="https://wa.me/244000000000" 
+        href="https://wa.me/244938325192" 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-[60] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all"
