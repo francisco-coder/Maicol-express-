@@ -22,9 +22,10 @@ import {
   Quote,
   Send,
   Image as ImageIcon,
-  ChevronDown
+  ChevronDown,
+  ArrowUp
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 
 const Navbar = () => {
   return (
@@ -47,7 +48,7 @@ const Navbar = () => {
           <a href="#contacto" className="hover:text-[#746840] transition-colors">Contacto</a>
         </div>
         <a 
-          href="https://wa.me/244938325192" 
+          href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" 
           target="_blank" 
           rel="noopener noreferrer"
           className="bg-[#746840] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#5a5132] transition-all"
@@ -463,7 +464,7 @@ const Contact = () => {
                 </div>
               </a>
 
-              <a href="https://wa.me/244938325192" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 text-white hover:text-[#25D366] transition-all group">
+              <a href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 text-white hover:text-[#25D366] transition-all group">
                 <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#25D366]/20 border border-white/10 group-hover:border-[#25D366]/30 transition-all">
                   <MessageCircle className="w-6 h-6" />
                 </div>
@@ -686,6 +687,28 @@ const Footer = () => {
 };
 
 export default function App() {
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans antialiased overflow-x-hidden scroll-smooth">
       <Navbar />
@@ -699,15 +722,35 @@ export default function App() {
       </main>
       <Footer />
       
-      {/* Floating WhatsApp Button */}
-      <a 
-        href="https://wa.me/244938325192" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="fixed bottom-8 right-8 z-[60] bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all"
-      >
-        <MessageSquare className="w-6 h-6" />
-      </a>
+      {/* Floating Buttons Container */}
+      <div className="fixed bottom-8 right-8 z-[60] flex flex-col gap-4">
+        <AnimatePresence>
+          {showScrollTop && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.5, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.5, y: 20 }}
+              onClick={scrollToTop}
+              className="bg-white text-[#746840] p-4 rounded-full shadow-2xl border border-slate-100 hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all"
+              aria-label="Voltar ao topo"
+            >
+              <ArrowUp className="w-6 h-6" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Floating WhatsApp Button */}
+        <motion.a 
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all"
+        >
+          <MessageSquare className="w-6 h-6" />
+        </motion.a>
+      </div>
     </div>
   );
 }
