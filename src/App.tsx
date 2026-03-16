@@ -21,7 +21,8 @@ import {
   Star,
   Quote,
   Send,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ChevronDown
 } from 'lucide-react';
 import { motion } from 'motion/react';
 
@@ -42,6 +43,7 @@ const Navbar = () => {
           <a href="#hero" className="hover:text-[#746840] transition-colors">Início</a>
           <a href="#servicos" className="hover:text-[#746840] transition-colors">Serviços</a>
           <a href="#sobre" className="hover:text-[#746840] transition-colors">Sobre</a>
+          <a href="#faq" className="hover:text-[#746840] transition-colors">FAQ</a>
           <a href="#contacto" className="hover:text-[#746840] transition-colors">Contacto</a>
         </div>
         <a 
@@ -155,13 +157,21 @@ const Services = () => {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover={{ y: -5 }}
-            className="md:col-span-2 bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col justify-between group"
+            whileHover="hover"
+            variants={{
+              hover: { y: -5 }
+            }}
+            className="md:col-span-2 bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col justify-between group cursor-default"
           >
             <div className="max-w-md">
-              <div className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6">
+              <motion.div 
+                variants={{
+                  hover: { scale: 1.1, rotate: 10 }
+                }}
+                className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6"
+              >
                 <Smartphone className="text-[#746840] w-6 h-6" />
-              </div>
+              </motion.div>
               <h3 className="text-2xl font-bold mb-4">Venda de Eletrónicos</h3>
               <p className="text-slate-600 mb-6">Equipamentos de última geração. iPhones, PCs de Alta Performance e consoles PS5 prontos para entrega imediata.</p>
               <div className="flex flex-wrap gap-2">
@@ -188,12 +198,20 @@ const Services = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            whileHover={{ y: -5 }}
-            className="bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col group"
+            whileHover="hover"
+            variants={{
+              hover: { y: -5 }
+            }}
+            className="bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col group cursor-default"
           >
-            <div className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6">
+            <motion.div 
+              variants={{
+                hover: { scale: 1.1, rotate: -10 }
+              }}
+              className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6"
+            >
               <Code className="text-[#746840] w-6 h-6" />
-            </div>
+            </motion.div>
             <h3 className="text-2xl font-bold mb-4">Soluções Digitais</h3>
             <p className="text-slate-600 mb-8">Presença digital completa: Criação Web moderna e Gestão de Redes Sociais estratégica para o seu negócio.</p>
             <div className="mt-auto">
@@ -212,13 +230,21 @@ const Services = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            whileHover={{ y: -5 }}
-            className="md:col-span-3 bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col md:flex-row items-center gap-8 group"
+            whileHover="hover"
+            variants={{
+              hover: { y: -5 }
+            }}
+            className="md:col-span-3 bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col md:flex-row items-center gap-8 group cursor-default"
           >
             <div className="flex-1">
-              <div className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6">
+              <motion.div 
+                variants={{
+                  hover: { scale: 1.1, y: -2 }
+                }}
+                className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6"
+              >
                 <Briefcase className="text-[#746840] w-6 h-6" />
-              </div>
+              </motion.div>
               <h3 className="text-2xl font-bold mb-4">Corretoria e Soluções Tech</h3>
               <p className="text-slate-600">Consultoria especializada para aquisição de infraestrutura tecnológica e intermediação de negócios de alta complexidade.</p>
             </div>
@@ -401,53 +427,82 @@ const Contact = () => {
   };
 
   return (
-    <section id="contacto" className="py-24 bg-slate-900 text-white rounded-[3rem] mx-4 md:mx-6 mb-12 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="contacto" className="py-24 bg-slate-900 text-white rounded-[3rem] mx-4 md:mx-6 mb-12 overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-96 h-96 bg-[#746840]/10 blur-[120px] rounded-full -z-0"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#746840]/5 blur-[100px] rounded-full -z-0"></div>
+      
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl font-bold mb-8">Pronto para o Próximo Nível?</h2>
-            <p className="text-slate-400 text-lg mb-8">Entre em contacto hoje e descubra como a Maicol-Express pode transformar a sua relação com a tecnologia.</p>
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-block px-4 py-1.5 bg-[#746840]/20 rounded-full mb-6 border border-[#746840]/30"
+            >
+              <span className="text-[#746840] text-xs font-bold uppercase tracking-widest">Contactos</span>
+            </motion.div>
             
-            <div className="flex flex-col gap-4 mb-12">
-              <a href="tel:+244938325192" className="flex items-center gap-4 text-white hover:text-[#746840] transition-colors group">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#746840]/20 transition-all">
-                  <Smartphone className="w-5 h-5" />
+            <h2 className="text-4xl md:text-5xl font-bold mb-8 tracking-tight">Vamos Conversar?</h2>
+            <p className="text-slate-400 text-lg mb-10 max-w-md">
+              Estamos prontos para elevar a sua tecnologia. Entre em contacto pelos nossos canais oficiais ou visite-nos no Morro Bento.
+            </p>
+            
+            <div className="flex flex-col gap-6 mb-12">
+              <a href="tel:+244938325192" className="flex items-center gap-5 text-white hover:text-[#746840] transition-all group">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#746840]/20 border border-white/10 group-hover:border-[#746840]/30 transition-all">
+                  <Smartphone className="w-6 h-6" />
                 </div>
-                <span className="text-lg font-medium">+244 938 325 192</span>
+                <div>
+                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Telefone</p>
+                  <span className="text-xl font-medium">+244 938 325 192</span>
+                </div>
               </a>
-              <div className="flex items-center gap-4 text-white">
-                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <MapPin className="w-5 h-5" />
+
+              <a href="https://wa.me/244938325192" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 text-white hover:text-[#25D366] transition-all group">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#25D366]/20 border border-white/10 group-hover:border-[#25D366]/30 transition-all">
+                  <MessageCircle className="w-6 h-6" />
                 </div>
-                <span className="text-lg font-medium">Morro Bento, Luanda</span>
+                <div>
+                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">WhatsApp</p>
+                  <span className="text-xl font-medium">Atendimento Imediato</span>
+                </div>
+              </a>
+              
+              <div className="flex items-center gap-5 text-white">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                  <MapPin className="w-6 h-6" />
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Localização</p>
+                  <span className="text-xl font-medium">Morro Bento, Luanda</span>
+                </div>
               </div>
             </div>
 
-            <div className="bg-white/5 p-8 rounded-3xl border border-white/10">
+            <div className="bg-white/5 p-8 rounded-[2rem] border border-white/10 backdrop-blur-sm">
               <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
-                <Clock className="text-[#746840]/40 w-6 h-6" />
-                Horário de Funcionamento
+                <Clock className="text-[#746840] w-6 h-6" />
+                Horário de Atendimento
               </h3>
-              <table className="w-full text-sm">
-                <tbody className="divide-y divide-white/10">
-                  <tr>
-                    <td className="py-3 text-slate-400">Segunda - Sexta</td>
-                    <td className="py-3 text-right font-medium">08:00 - 17:00</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 text-slate-400">Sábado</td>
-                    <td className="py-3 text-right font-medium">08:00 - 14:00</td>
-                  </tr>
-                  <tr>
-                    <td className="py-3 text-slate-400">Domingo</td>
-                    <td className="py-3 text-right font-medium text-red-400">Encerrado</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                  <span className="text-slate-400">Segunda - Sexta</span>
+                  <span className="font-medium">08:00 - 17:00</span>
+                </div>
+                <div className="flex justify-between items-center pb-3 border-b border-white/5">
+                  <span className="text-slate-400">Sábado</span>
+                  <span className="font-medium">08:00 - 14:00</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-400">Domingo</span>
+                  <span className="font-medium text-red-400">Encerrado</span>
+                </div>
+              </div>
             </div>
           </motion.div>
           
@@ -525,6 +580,71 @@ const Contact = () => {
   );
 };
 
+const FAQ = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
+
+  const faqs = [
+    {
+      question: "Quais são os principais produtos eletrónicos que vendem?",
+      answer: "Vendemos iPhones de última geração, PCs de alta performance e consolas PlayStation 5, todos prontos para entrega imediata e com garantia de qualidade."
+    },
+    {
+      question: "Onde está localizada a loja física da Maicol-Express?",
+      answer: "Estamos localizados no Morro Bento, em Luanda, mesmo em frente ao ENAPP. Pode visitar-nos de Segunda a Sexta (08:00 - 17:00) e aos Sábados (08:00 - 14:00)."
+    },
+    {
+      question: "Como funcionam os vossos serviços de Soluções Digitais?",
+      answer: "Oferecemos criação e gestão de websites modernos, bem como gestão estratégica de redes sociais para elevar a presença digital e a autoridade do seu negócio no mercado."
+    }
+  ];
+
+  return (
+    <section id="faq" className="py-24 bg-white">
+      <div className="max-w-3xl mx-auto px-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl font-bold text-slate-900 mb-4">Dúvidas Frequentes</h2>
+          <p className="text-slate-600">Encontre respostas rápidas para as perguntas mais comuns.</p>
+        </motion.div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <motion.div 
+              key={index}
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="border border-slate-100 rounded-2xl overflow-hidden"
+            >
+              <button 
+                onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                className="w-full px-8 py-6 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
+              >
+                <span className="font-bold text-slate-900">{faq.question}</span>
+                <ChevronDown className={`w-5 h-5 text-[#746840] transition-transform duration-300 ${openIndex === index ? 'rotate-180' : ''}`} />
+              </button>
+              <motion.div 
+                initial={false}
+                animate={{ height: openIndex === index ? 'auto' : 0, opacity: openIndex === index ? 1 : 0 }}
+                className="overflow-hidden"
+              >
+                <div className="px-8 pb-6 text-slate-600 leading-relaxed">
+                  {faq.answer}
+                </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const Footer = () => {
   return (
     <footer className="py-12">
@@ -574,6 +694,7 @@ export default function App() {
         <Services />
         <About />
         <Testimonials />
+        <FAQ />
         <Contact />
       </main>
       <Footer />
