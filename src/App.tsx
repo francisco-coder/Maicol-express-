@@ -23,15 +23,166 @@ import {
   Send,
   Image as ImageIcon,
   ChevronDown,
-  ArrowUp
+  ArrowUp,
+  Cpu,
+  Zap,
+  ShieldCheck
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'motion/react';
+
+const TextReveal = ({ text, className = "" }: { text: string, className?: string }) => {
+  const words = text.split(" ");
+  
+  const container = {
+    hidden: { opacity: 0 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      transition: { staggerChildren: 0.12, delayChildren: 0.04 * i },
+    }),
+  };
+
+  const child = {
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+    hidden: {
+      opacity: 0,
+      y: 20,
+      transition: {
+        type: "spring",
+        damping: 12,
+        stiffness: 100,
+      },
+    },
+  };
+
+  return (
+    <motion.div
+      style={{ display: "flex", flexWrap: "wrap" }}
+      variants={container}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true }}
+      className={className}
+    >
+      {words.map((word, index) => (
+        <motion.span
+          variants={child}
+          style={{ marginRight: "0.25em" }}
+          key={index}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </motion.div>
+  );
+};
+
+const MagneticButton = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouse = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY, currentTarget } = e;
+    const { width, height, left, top } = currentTarget.getBoundingClientRect();
+    const x = clientX - (left + width / 2);
+    const y = clientY - (top + height / 2);
+    setPosition({ x, y });
+  };
+
+  const reset = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  const { x, y } = position;
+
+  return (
+    <motion.div
+      onMouseMove={handleMouse}
+      onMouseLeave={reset}
+      animate={{ x, y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+const CustomCursor = () => {
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isHovering, setIsHovering] = useState(false);
+
+  useEffect(() => {
+    const moveCursor = (e: MouseEvent) => {
+      setPosition({ x: e.clientX, y: e.clientY });
+    };
+
+    const handleHover = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'A' || 
+        target.tagName === 'BUTTON' || 
+        target.closest('button') || 
+        target.closest('a') ||
+        target.classList.contains('cursor-pointer')
+      ) {
+        setIsHovering(true);
+      } else {
+        setIsHovering(false);
+      }
+    };
+
+    window.addEventListener('mousemove', moveCursor);
+    window.addEventListener('mouseover', handleHover);
+
+    return () => {
+      window.removeEventListener('mousemove', moveCursor);
+      window.removeEventListener('mouseover', handleHover);
+    };
+  }, []);
+
+  return (
+    <>
+      <motion.div
+        className="fixed top-0 left-0 w-8 h-8 bg-[#746840]/20 rounded-full pointer-events-none z-[9999] hidden md:block"
+        animate={{
+          x: position.x - 16,
+          y: position.y - 16,
+          scale: isHovering ? 2 : 1,
+        }}
+        transition={{ type: 'spring', stiffness: 250, damping: 20, mass: 0.5 }}
+      />
+      <motion.div
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[#746840] rounded-full pointer-events-none z-[9999] hidden md:block"
+        animate={{
+          x: position.x - 3,
+          y: position.y - 3,
+        }}
+        transition={{ type: 'spring', stiffness: 1000, damping: 50, mass: 0.1 }}
+      />
+    </>
+  );
+};
 
 const Navbar = () => {
   return (
-    <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100">
+    <motion.nav 
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+      className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-slate-100"
+    >
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
+        <motion.div 
+          whileHover={{ scale: 1.05 }}
+          className="flex items-center space-x-2 cursor-pointer"
+        >
           <img 
             src="https://i.postimg.cc/8P9Cp56H/1773671672629-removebg-preview-01.jpg" 
             alt="Maicol-Express Logo" 
@@ -39,137 +190,314 @@ const Navbar = () => {
             referrerPolicy="no-referrer"
           />
           <span className="font-bold text-xl tracking-tight text-[#746840]">Maicol-Express</span>
-        </div>
+        </motion.div>
         <div className="hidden md:flex space-x-8 text-sm font-medium text-slate-600">
-          <a href="#hero" className="hover:text-[#746840] transition-colors">Início</a>
-          <a href="#servicos" className="hover:text-[#746840] transition-colors">Serviços</a>
-          <a href="#sobre" className="hover:text-[#746840] transition-colors">Sobre</a>
-          <a href="#faq" className="hover:text-[#746840] transition-colors">FAQ</a>
-          <a href="#contacto" className="hover:text-[#746840] transition-colors">Contacto</a>
+          {['Início', 'Serviços', 'Sobre', 'FAQ', 'Contacto'].map((item, i) => (
+            <motion.a 
+              key={item}
+              href={`#${item.toLowerCase().replace('í', 'i')}`}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + i * 0.1 }}
+              className="hover:text-[#746840] transition-colors relative group"
+            >
+              {item}
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#746840] transition-all group-hover:w-full"></span>
+            </motion.a>
+          ))}
         </div>
-        <a 
+        <motion.a 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="bg-[#746840] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#5a5132] transition-all"
+          className="bg-[#746840] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#5a5132] transition-all shadow-md shadow-[#746840]/20"
         >
           WhatsApp
-        </a>
+        </motion.a>
       </div>
-    </nav>
+    </motion.nav>
   );
 };
 
+const FloatingCard = ({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+    animate={{ 
+      opacity: 1, 
+      scale: 1, 
+      y: 0,
+      transition: { delay, type: 'spring', stiffness: 100 }
+    }}
+    whileHover={{ y: -10, transition: { duration: 0.3 } }}
+    className={`absolute p-4 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 z-20 ${className}`}
+  >
+    {children}
+  </motion.div>
+);
+
 const Hero = () => {
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 500], [0, 100]);
+  const y2 = useTransform(scrollY, [0, 500], [0, -100]);
+  const rotate = useTransform(scrollY, [0, 800], [0, 5]);
+  const opacityScroll = useTransform(scrollY, [400, 800], [1, 0.5]);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: 'spring', stiffness: 100, damping: 20 }
+    }
+  };
+
   return (
     <section id="hero" className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 relative z-10 text-center">
+      {/* Mouse Tracking Glow */}
+      <motion.div
+        className="absolute w-[600px] h-[600px] bg-[#746840]/10 rounded-full blur-[120px] pointer-events-none -z-10"
+        animate={{
+          x: mousePos.x - 300,
+          y: mousePos.y - 300,
+        }}
+        transition={{ type: 'spring', stiffness: 50, damping: 30, mass: 2 }}
+      />
+
+      {/* Animated Background Blobs */}
+      <motion.div 
+        style={{ y: y1 }}
+        animate={{ 
+          scale: [1, 1.2, 1],
+          rotate: [0, 90, 0],
+        }}
+        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#746840]/5 blur-[100px] rounded-full -z-10"
+      />
+      <motion.div 
+        style={{ y: y2 }}
+        animate={{ 
+          scale: [1, 1.3, 1],
+          rotate: [0, -90, 0],
+        }}
+        transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+        className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-[#746840]/5 blur-[120px] rounded-full -z-10"
+      />
+
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true }}
+        className="max-w-7xl mx-auto px-6 relative z-10 text-center"
+      >
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          variants={itemVariants}
           className="inline-flex items-center space-x-2 bg-[#746840]/10 px-4 py-1.5 rounded-full mb-6"
         >
-          <span className="w-2 h-2 bg-[#746840] rounded-full"></span>
+          <span className="w-2 h-2 bg-[#746840] rounded-full animate-pulse"></span>
           <span className="text-[#746840] text-xs font-semibold uppercase tracking-wider">Premium Tech in Luanda</span>
         </motion.div>
         
-        <motion.h1 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.1 }}
-          className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tight leading-tight mb-8"
-        >
-          Maicol-Express: <br />
-          <span className="text-[#746840]">O Futuro da Tecnologia</span>
-        </motion.h1>
+        <div className="flex justify-center mb-8">
+          <TextReveal 
+            text="Maicol-Express: O Futuro da Tecnologia" 
+            className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tight leading-tight max-w-4xl justify-center"
+          />
+        </div>
         
         <motion.p 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          variants={itemVariants}
           className="max-w-2xl mx-auto text-lg text-slate-600 mb-10"
         >
           Oferecemos soluções eletrónicas de alta performance e consultoria digital especializada em Morro Bento, Luanda.
         </motion.p>
         
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row items-center justify-center gap-6"
         >
-          <a 
-            href="#servicos" 
-            className="bg-[#746840] text-white px-8 py-4 rounded-full font-semibold transition-transform hover:scale-105 shadow-lg shadow-[#746840]/20"
-          >
-            Explorar Serviços
-          </a>
-          <a 
-            href="#contacto" 
-            className="px-8 py-4 rounded-full font-semibold border border-slate-200 hover:bg-slate-50 transition-colors"
-          >
-            Falar com Especialista
-          </a>
+          <MagneticButton>
+            <motion.a 
+              whileHover={{ scale: 1.05, boxShadow: '0 20px 25px -5px rgb(116 104 64 / 0.2)' }}
+              whileTap={{ scale: 0.95 }}
+              href="#servicos" 
+              className="bg-[#746840] text-white px-8 py-4 rounded-full font-semibold shadow-lg shadow-[#746840]/20 block"
+            >
+              Explorar Serviços
+            </motion.a>
+          </MagneticButton>
+          <MagneticButton>
+            <motion.a 
+              whileHover={{ scale: 1.05, backgroundColor: 'rgba(248, 250, 252, 1)' }}
+              whileTap={{ scale: 0.95 }}
+              href="#contacto" 
+              className="px-8 py-4 rounded-full font-semibold border border-slate-200 hover:bg-slate-50 transition-colors block"
+            >
+              Falar com Especialista
+            </motion.a>
+          </MagneticButton>
         </motion.div>
-      </div>
+      </motion.div>
 
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[400px] bg-[#746840]/5 blur-[120px] rounded-full -z-0"></div>
-      
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 40 }}
-        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        style={{ y: y1, rotate, opacity: opacityScroll }}
+        initial={{ opacity: 0, y: 100 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 1, delay: 0.4 }}
-        className="mt-20 max-w-5xl mx-auto px-6"
+        transition={{ duration: 1.2, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="mt-20 max-w-5xl mx-auto px-6 relative"
       >
-        <img 
-          alt="High-end Technology" 
-          className="rounded-[2.5rem] shadow-2xl border border-slate-200 w-full object-cover" 
-          src="https://i.postimg.cc/jScjYXRt/1773671672629.png"
-          referrerPolicy="no-referrer"
-        />
+        {/* Floating Elements */}
+        <FloatingCard className="-left-4 top-1/4 hidden lg:block" delay={1.2}>
+          <div className="flex items-center space-x-3">
+            <div className="bg-emerald-100 p-2 rounded-lg">
+              <Cpu className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900">Performance</p>
+              <p className="text-[10px] text-slate-500">Hardware de Elite</p>
+            </div>
+          </div>
+        </FloatingCard>
+
+        <FloatingCard className="-right-8 top-1/2 hidden lg:block" delay={1.4}>
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <Zap className="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900">Velocidade</p>
+              <p className="text-[10px] text-slate-500">Entrega Expressa</p>
+            </div>
+          </div>
+        </FloatingCard>
+
+        <FloatingCard className="left-1/4 -bottom-10 hidden lg:block" delay={1.6}>
+          <div className="flex items-center space-x-3">
+            <div className="bg-amber-100 p-2 rounded-lg">
+              <ShieldCheck className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900">Garantia</p>
+              <p className="text-[10px] text-slate-500">Suporte Premium</p>
+            </div>
+          </div>
+        </FloatingCard>
+
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent z-10 h-1/4 bottom-0 top-auto"></div>
+        <motion.div
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.5 }}
+          className="relative group"
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#746840] to-[#b5a67a] rounded-[2.6rem] blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+          <img 
+            alt="High-end Technology" 
+            className="relative rounded-[2.5rem] shadow-2xl border border-slate-200 w-full object-cover z-10" 
+            src="https://i.postimg.cc/jScjYXRt/1773671672629.png"
+            referrerPolicy="no-referrer"
+          />
+        </motion.div>
+
+        {/* Scroll Indicator */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center space-y-2"
+        >
+          <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Scroll</span>
+          <div className="w-px h-12 bg-gradient-to-b from-slate-300 to-transparent"></div>
+        </motion.div>
       </motion.div>
     </section>
   );
 };
 
 const Services = () => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15
+      }
+    }
+  };
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: 'spring', stiffness: 80, damping: 15 }
+    }
+  };
+
   return (
     <section id="servicos" className="py-24 bg-slate-50">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           className="mb-16"
         >
-          <h2 className="text-3xl font-bold text-[#746840] mb-4">Nossas Soluções</h2>
-          <p className="text-slate-600">Excelência e inovação em cada detalhe.</p>
+          <TextReveal text="Nossas Soluções" className="text-4xl font-bold text-[#746840] mb-4" />
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-slate-600"
+          >
+            Excelência e inovação em cada detalhe.
+          </motion.p>
         </motion.div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
           {/* Venda de Eletrónicos */}
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            variants={cardVariants}
             whileHover="hover"
-            variants={{
-              hover: { y: -5 }
-            }}
-            className="md:col-span-2 bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col justify-between group cursor-default"
+            className="md:col-span-2 bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col justify-between group cursor-default relative overflow-hidden"
           >
-            <div className="max-w-md">
+            <motion.div 
+              className="absolute top-0 right-0 w-32 h-32 bg-[#746840]/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"
+            ></motion.div>
+            <div className="max-w-md relative z-10">
               <motion.div 
                 variants={{
-                  hover: { scale: 1.1, rotate: 10 }
+                  hover: { scale: 1.1, rotate: 10, backgroundColor: 'rgba(116, 104, 64, 0.2)' }
                 }}
-                className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6"
+                className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6 transition-colors"
               >
                 <Smartphone className="text-[#746840] w-6 h-6" />
               </motion.div>
@@ -177,16 +505,23 @@ const Services = () => {
               <p className="text-slate-600 mb-6">Equipamentos de última geração. iPhones, PCs de Alta Performance e consoles PS5 prontos para entrega imediata.</p>
               <div className="flex flex-wrap gap-2">
                 {['Apple', 'Gaming Gear', 'Workstations'].map((tag) => (
-                  <span key={tag} className="px-3 py-1 bg-white border border-slate-200 rounded-full text-xs font-medium">
+                  <motion.span 
+                    key={tag} 
+                    whileHover={{ scale: 1.1, backgroundColor: '#746840', color: '#fff' }}
+                    className="px-3 py-1 bg-white border border-slate-200 rounded-full text-xs font-medium transition-colors"
+                  >
                     {tag}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
             </div>
-            <div className="mt-8 flex justify-end">
-              <img 
+            <div className="mt-8 flex justify-end relative z-10">
+              <motion.img 
+                variants={{
+                  hover: { rotate: 5, scale: 1.05 }
+                }}
                 alt="Electronics" 
-                className="w-48 h-32 object-cover rounded-2xl shadow-lg transform group-hover:rotate-2 transition-transform" 
+                className="w-48 h-32 object-cover rounded-2xl shadow-lg transition-all" 
                 src="https://i.postimg.cc/BvR1Lgk2/1773670503164.png"
                 referrerPolicy="no-referrer"
               />
@@ -195,28 +530,28 @@ const Services = () => {
 
           {/* Soluções Digitais */}
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+            variants={cardVariants}
             whileHover="hover"
-            variants={{
-              hover: { y: -5 }
-            }}
-            className="bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col group cursor-default"
+            className="bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col group cursor-default relative overflow-hidden"
           >
             <motion.div 
+              className="absolute bottom-0 left-0 w-24 h-24 bg-[#746840]/5 rounded-full -ml-12 -mb-12 group-hover:scale-150 transition-transform duration-700"
+            ></motion.div>
+            <motion.div 
               variants={{
-                hover: { scale: 1.1, rotate: -10 }
+                hover: { scale: 1.1, rotate: -10, backgroundColor: 'rgba(116, 104, 64, 0.2)' }
               }}
-              className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6"
+              className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6 transition-colors relative z-10"
             >
               <Code className="text-[#746840] w-6 h-6" />
             </motion.div>
-            <h3 className="text-2xl font-bold mb-4">Soluções Digitais</h3>
-            <p className="text-slate-600 mb-8">Presença digital completa: Criação Web moderna e Gestão de Redes Sociais estratégica para o seu negócio.</p>
-            <div className="mt-auto">
-              <img 
+            <h3 className="text-2xl font-bold mb-4 relative z-10">Soluções Digitais</h3>
+            <p className="text-slate-600 mb-8 relative z-10">Presença digital completa: Criação Web moderna e Gestão de Redes Sociais estratégica para o seu negócio.</p>
+            <div className="mt-auto relative z-10">
+              <motion.img 
+                variants={{
+                  hover: { y: -10 }
+                }}
                 alt="Web Dev" 
                 className="rounded-2xl w-full h-40 object-cover grayscale group-hover:grayscale-0 transition-all" 
                 src="https://i.postimg.cc/D0rfzd3b/1773675060458.png"
@@ -227,40 +562,45 @@ const Services = () => {
 
           {/* Corretoria Tech */}
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
+            variants={cardVariants}
             whileHover="hover"
-            variants={{
-              hover: { y: -5 }
-            }}
-            className="md:col-span-3 bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col md:flex-row items-center gap-8 group cursor-default"
+            className="md:col-span-3 bg-white/80 backdrop-blur-md border border-white/20 p-10 rounded-[2rem] shadow-sm flex flex-col md:flex-row items-center gap-8 group cursor-default relative overflow-hidden"
           >
-            <div className="flex-1">
+            <div className="flex-1 relative z-10">
               <motion.div 
                 variants={{
-                  hover: { scale: 1.1, y: -2 }
+                  hover: { scale: 1.1, y: -2, backgroundColor: 'rgba(116, 104, 64, 0.2)' }
                 }}
-                className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6"
+                className="w-12 h-12 bg-[#746840]/10 rounded-2xl flex items-center justify-center mb-6 transition-colors"
               >
                 <Briefcase className="text-[#746840] w-6 h-6" />
               </motion.div>
               <h3 className="text-2xl font-bold mb-4">Corretoria e Soluções Tech</h3>
               <p className="text-slate-600">Consultoria especializada para aquisição de infraestrutura tecnológica e intermediação de negócios de alta complexidade.</p>
             </div>
-            <div className="flex-1 grid grid-cols-2 gap-4 w-full">
-              <div className="p-6 bg-white rounded-2xl border border-slate-100 text-center">
-                <div className="text-3xl font-bold text-[#746840] mb-1">100%</div>
+            <div className="flex-1 grid grid-cols-2 gap-4 w-full relative z-10">
+              <motion.div 
+                whileHover={{ y: -5, backgroundColor: '#f8fafc' }}
+                className="p-6 bg-white rounded-2xl border border-slate-100 text-center transition-colors"
+              >
+                <motion.div 
+                  initial={{ scale: 1 }}
+                  whileInView={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="text-3xl font-bold text-[#746840] mb-1"
+                >100%</motion.div>
                 <div className="text-xs text-slate-500 uppercase tracking-widest font-semibold">Segurança</div>
-              </div>
-              <div className="p-6 bg-[#746840] text-white rounded-2xl text-center">
+              </motion.div>
+              <motion.div 
+                whileHover={{ y: -5, backgroundColor: '#5a5132' }}
+                className="p-6 bg-[#746840] text-white rounded-2xl text-center transition-colors"
+              >
                 <div className="text-3xl font-bold mb-1">Pro</div>
                 <div className="text-xs text-white/70 uppercase tracking-widest font-semibold">Consultoria</div>
-              </div>
+              </motion.div>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -272,56 +612,76 @@ const About = () => {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col lg:flex-row items-center gap-16">
           <motion.div 
-            initial={{ opacity: 0, x: -30 }}
+            initial={{ opacity: 0, x: -50 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 50, damping: 20 }}
             className="lg:w-1/2"
           >
             <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               className="inline-block px-4 py-1.5 bg-[#746840]/10 rounded-full mb-6"
             >
               <span className="text-[#746840] text-xs font-bold uppercase tracking-widest">Sobre Nós</span>
             </motion.div>
-            <h2 className="text-4xl font-bold text-slate-900 mb-6">MXS - Soluções Tecnológicas</h2>
-            <p className="text-lg text-slate-600 mb-6 leading-relaxed">
+            <TextReveal text="MXS - Soluções Tecnológicas" className="text-4xl font-bold text-slate-900 mb-6" />
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="text-lg text-slate-600 mb-6 leading-relaxed"
+            >
               A <strong className="text-slate-900">Maicol-Express</strong> (também conhecida como MXS) é uma empresa multi-serviços sediada em Luanda, Angola. Somos especialistas em oferecer soluções tecnológicas integradas que impulsionam o seu estilo de vida e o seu negócio.
-            </p>
+            </motion.p>
             <p className="text-lg text-slate-600 mb-8 leading-relaxed">
               Desde o retalho de eletrónicos premium até à corretoria especializada e gestão digital, o nosso compromisso é com a excelência e a satisfação total dos nossos clientes no coração do Morro Bento.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
-              <div className="flex items-start space-x-4">
-                <div className="p-3 bg-slate-50 rounded-2xl"><Smartphone className="text-[#746840] w-6 h-6" /></div>
-                <div>
-                  <h4 className="font-bold text-slate-900">Hardware</h4>
-                  <p className="text-sm text-slate-500">iPhones, PCs & PS5</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-4">
-                <div className="p-3 bg-slate-50 rounded-2xl"><Code className="text-[#746840] w-6 h-6" /></div>
-                <div>
-                  <h4 className="font-bold text-slate-900">Digital</h4>
-                  <p className="text-sm text-slate-500">Web & Redes Sociais</p>
-                </div>
-              </div>
+              {[
+                { icon: Smartphone, title: 'Hardware', desc: 'iPhones, PCs & PS5' },
+                { icon: Code, title: 'Digital', desc: 'Web & Redes Sociais' }
+              ].map((item, i) => (
+                <motion.div 
+                  key={item.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 + i * 0.1 }}
+                  whileHover={{ x: 5 }}
+                  className="flex items-start space-x-4"
+                >
+                  <div className="p-3 bg-slate-50 rounded-2xl"><item.icon className="text-[#746840] w-6 h-6" /></div>
+                  <div>
+                    <h4 className="font-bold text-slate-900">{item.title}</h4>
+                    <p className="text-sm text-slate-500">{item.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
 
-            <div className="flex items-start space-x-4">
-              <div className="mt-1"><MapPin className="text-[#746840] w-6 h-6" /></div>
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="flex items-start space-x-4"
+            >
+              <div className="mt-1"><MapPin className="text-[#746840] w-6 h-6 animate-bounce" /></div>
               <div>
                 <h4 className="font-bold">Localização</h4>
                 <p className="text-slate-500">Morro Bento, Frente ao ENAPP, Luanda - Angola</p>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
           <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, x: 50, scale: 0.9 }}
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
             viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 50, damping: 20 }}
             className="lg:w-1/2 w-full"
           >
             <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl aspect-square lg:aspect-video bg-slate-200 group">
@@ -367,7 +727,7 @@ const Testimonials = () => {
   ];
 
   return (
-    <section id="depoimentos" className="py-24 bg-slate-50">
+    <section id="depoimentos" className="py-24 bg-slate-50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -383,15 +743,23 @@ const Testimonials = () => {
           {testimonials.map((item, index) => (
             <motion.div
               key={item.name}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.9, x: index % 2 === 0 ? -20 : 20 }}
+              whileInView={{ opacity: 1, scale: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-full"
+              transition={{ type: 'spring', stiffness: 100, damping: 15, delay: index * 0.15 }}
+              whileHover={{ y: -10, scale: 1.02 }}
+              className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col h-full transition-shadow hover:shadow-xl"
             >
               <div className="flex mb-4">
                 {[...Array(item.rating)].map((_, i) => (
-                  <Star key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + i * 0.1 }}
+                  >
+                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                  </motion.div>
                 ))}
               </div>
               <div className="relative flex-grow">
@@ -420,28 +788,41 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real app, you would send this to a backend
     console.log('Form submitted:', formState);
     setIsSubmitted(true);
-    // Reset form
     setFormState({ name: '', email: '', message: '' });
   };
 
   return (
     <section id="contacto" className="py-24 bg-slate-900 text-white rounded-[3rem] mx-4 md:mx-6 mb-12 overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-[#746840]/10 blur-[120px] rounded-full -z-0"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#746840]/5 blur-[100px] rounded-full -z-0"></div>
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.1, 0.15, 0.1]
+        }}
+        transition={{ duration: 8, repeat: Infinity }}
+        className="absolute top-0 right-0 w-96 h-96 bg-[#746840]/10 blur-[120px] rounded-full -z-0"
+      ></motion.div>
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.3, 1],
+          opacity: [0.05, 0.08, 0.05]
+        }}
+        transition={{ duration: 10, repeat: Infinity, delay: 1 }}
+        className="absolute bottom-0 left-0 w-64 h-64 bg-[#746840]/5 blur-[100px] rounded-full -z-0"
+      ></motion.div>
       
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 50, damping: 20 }}
           >
             <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               className="inline-block px-4 py-1.5 bg-[#746840]/20 rounded-full mb-6 border border-[#746840]/30"
             >
@@ -454,38 +835,50 @@ const Contact = () => {
             </p>
             
             <div className="flex flex-col gap-6 mb-12">
-              <a href="tel:+244938325192" className="flex items-center gap-5 text-white hover:text-[#746840] transition-all group">
-                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#746840]/20 border border-white/10 group-hover:border-[#746840]/30 transition-all">
-                  <Smartphone className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Telefone</p>
-                  <span className="text-xl font-medium">+244 938 325 192</span>
-                </div>
-              </a>
-
-              <a href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 text-white hover:text-[#25D366] transition-all group">
-                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center group-hover:bg-[#25D366]/20 border border-white/10 group-hover:border-[#25D366]/30 transition-all">
-                  <MessageCircle className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">WhatsApp</p>
-                  <span className="text-xl font-medium">Atendimento Imediato</span>
-                </div>
-              </a>
-              
-              <div className="flex items-center gap-5 text-white">
-                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
-                  <MapPin className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Localização</p>
-                  <span className="text-xl font-medium">Morro Bento, Luanda</span>
-                </div>
-              </div>
+              {[
+                { icon: Smartphone, label: 'Telefone', value: '+244 938 325 192', href: 'tel:+244938325192', color: 'hover:text-[#746840]', bg: 'group-hover:bg-[#746840]/20', border: 'group-hover:border-[#746840]/30' },
+                { icon: MessageCircle, label: 'WhatsApp', value: 'Atendimento Imediato', href: 'https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn', color: 'hover:text-[#25D366]', bg: 'group-hover:bg-[#25D366]/20', border: 'group-hover:border-[#25D366]/30' },
+                { icon: MapPin, label: 'Localização', value: 'Morro Bento, Luanda', href: null }
+              ].map((item, i) => (
+                <motion.div
+                  key={item.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 + i * 0.1 }}
+                >
+                  {item.href ? (
+                    <a href={item.href} target={item.href.startsWith('http') ? "_blank" : undefined} rel={item.href.startsWith('http') ? "noopener noreferrer" : undefined} className={`flex items-center gap-5 text-white ${item.color} transition-all group`}>
+                      <div className={`w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center ${item.bg} border border-white/10 ${item.border} transition-all`}>
+                        <item.icon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">{item.label}</p>
+                        <span className="text-xl font-medium">{item.value}</span>
+                      </div>
+                    </a>
+                  ) : (
+                    <div className="flex items-center gap-5 text-white">
+                      <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center border border-white/10">
+                        <item.icon className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">{item.label}</p>
+                        <span className="text-xl font-medium">{item.value}</span>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              ))}
             </div>
 
-            <div className="bg-white/5 p-8 rounded-[2rem] border border-white/10 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.6 }}
+              className="bg-white/5 p-8 rounded-[2rem] border border-white/10 backdrop-blur-sm"
+            >
               <h3 className="text-xl font-semibold mb-6 flex items-center gap-3">
                 <Clock className="text-[#746840] w-6 h-6" />
                 Horário de Atendimento
@@ -504,76 +897,102 @@ const Contact = () => {
                   <span className="font-medium text-red-400">Encerrado</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
           
           <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 50, damping: 20 }}
             className="bg-white/5 p-8 md:p-10 rounded-[2.5rem] border border-white/10"
           >
-            {isSubmitted ? (
-              <div className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12">
-                <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mb-4">
-                  <MessageSquare className="text-emerald-400 w-8 h-8" />
-                </div>
-                <h3 className="text-2xl font-bold">Mensagem Enviada!</h3>
-                <p className="text-slate-400">Agradecemos o seu contacto. Responderemos o mais breve possível.</p>
-                <button 
-                  onClick={() => setIsSubmitted(false)}
-                  className="text-[#746840] font-medium hover:underline mt-4"
+            <AnimatePresence mode="wait">
+              {isSubmitted ? (
+                <motion.div 
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  className="h-full flex flex-col items-center justify-center text-center space-y-4 py-12"
                 >
-                  Enviar outra mensagem
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <label htmlFor="name" className="text-sm font-medium text-slate-300">Nome Completo</label>
-                  <input 
-                    type="text" 
-                    id="name"
-                    required
-                    value={formState.name}
-                    onChange={(e) => setFormState({...formState, name: e.target.value})}
-                    placeholder="Seu nome aqui"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-[#746840]/50 transition-all placeholder:text-slate-600"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium text-slate-300">E-mail</label>
-                  <input 
-                    type="email" 
-                    id="email"
-                    required
-                    value={formState.email}
-                    onChange={(e) => setFormState({...formState, email: e.target.value})}
-                    placeholder="seu@email.com"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-[#746840]/50 transition-all placeholder:text-slate-600"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="message" className="text-sm font-medium text-slate-300">Mensagem</label>
-                  <textarea 
-                    id="message"
-                    required
-                    rows={4}
-                    value={formState.message}
-                    onChange={(e) => setFormState({...formState, message: e.target.value})}
-                    placeholder="Como podemos ajudar?"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-[#746840]/50 transition-all placeholder:text-slate-600 resize-none"
-                  ></textarea>
-                </div>
-                <button 
-                  type="submit"
-                  className="w-full bg-[#746840] hover:bg-[#5a5132] text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[#746840]/20"
+                  <motion.div 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 10 }}
+                    className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mb-4"
+                  >
+                    <MessageSquare className="text-emerald-400 w-8 h-8" />
+                  </motion.div>
+                  <h3 className="text-2xl font-bold">Mensagem Enviada!</h3>
+                  <p className="text-slate-400">Agradecemos o seu contacto. Responderemos o mais breve possível.</p>
+                  <button 
+                    onClick={() => setIsSubmitted(false)}
+                    className="text-[#746840] font-medium hover:underline mt-4"
+                  >
+                    Enviar outra mensagem
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.form 
+                  key="form"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleSubmit} 
+                  className="space-y-6"
                 >
-                  Enviar Mensagem
-                  <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                </button>
-              </form>
-            )}
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="text-sm font-medium text-slate-300">Nome Completo</label>
+                    <motion.input 
+                      whileFocus={{ scale: 1.01 }}
+                      type="text" 
+                      id="name"
+                      required
+                      value={formState.name}
+                      onChange={(e) => setFormState({...formState, name: e.target.value})}
+                      placeholder="Seu nome aqui"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-[#746840]/50 transition-all placeholder:text-slate-600"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium text-slate-300">E-mail</label>
+                    <motion.input 
+                      whileFocus={{ scale: 1.01 }}
+                      type="email" 
+                      id="email"
+                      required
+                      value={formState.email}
+                      onChange={(e) => setFormState({...formState, email: e.target.value})}
+                      placeholder="seu@email.com"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-[#746840]/50 transition-all placeholder:text-slate-600"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="message" className="text-sm font-medium text-slate-300">Mensagem</label>
+                    <motion.textarea 
+                      whileFocus={{ scale: 1.01 }}
+                      id="message"
+                      required
+                      rows={4}
+                      value={formState.message}
+                      onChange={(e) => setFormState({...formState, message: e.target.value})}
+                      placeholder="Como podemos ajudar?"
+                      className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-[#746840]/50 transition-all placeholder:text-slate-600 resize-none"
+                    ></motion.textarea>
+                  </div>
+                  <motion.button 
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    type="submit"
+                    className="w-full bg-[#746840] hover:bg-[#5a5132] text-white font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-[#746840]/20"
+                  >
+                    Enviar Mensagem
+                    <Send className="w-5 h-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  </motion.button>
+                </motion.form>
+              )}
+            </AnimatePresence>
           </motion.div>
         </div>
       </div>
@@ -608,8 +1027,15 @@ const FAQ = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl font-bold text-slate-900 mb-4">Dúvidas Frequentes</h2>
-          <p className="text-slate-600">Encontre respostas rápidas para as perguntas mais comuns.</p>
+          <TextReveal text="Dúvidas Frequentes" className="text-4xl font-bold text-slate-900 mb-4 justify-center" />
+          <motion.p 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-slate-600"
+          >
+            Encontre respostas rápidas para as perguntas mais comuns.
+          </motion.p>
         </motion.div>
 
         <div className="space-y-4">
@@ -649,8 +1075,16 @@ const FAQ = () => {
 const Footer = () => {
   return (
     <footer className="py-12">
-      <div className="max-w-7xl mx-auto px-6 border-t border-slate-100 pt-12 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="max-w-7xl mx-auto px-6 border-t border-slate-100 pt-12 flex flex-col md:flex-row items-center justify-between gap-8"
+      >
+        <motion.div 
+          whileHover={{ scale: 1.02 }}
+          className="cursor-default"
+        >
           <div className="flex items-center space-x-2 mb-2">
             <img 
               src="https://i.postimg.cc/8P9Cp56H/1773671672629-removebg-preview-01.jpg" 
@@ -661,41 +1095,48 @@ const Footer = () => {
             <span className="font-bold text-lg text-[#746840]">Maicol-Express</span>
           </div>
           <p className="text-sm text-slate-500">© 2023 Maicol-Express. Luanda, Angola.</p>
-        </div>
+        </motion.div>
         
         <div className="flex space-x-6">
           {[
             { icon: Facebook, label: 'Facebook', url: 'https://www.facebook.com/people/Miguel-BV/100088111299053/' },
             { icon: Instagram, label: 'Instagram', url: 'https://www.instagram.com/maicolxpress.corretoria/' },
             { icon: Video, label: 'TikTok', url: 'https://www.tiktok.com/@maicol.express' }
-          ].map((social) => (
-            <a 
+          ].map((social, i) => (
+            <motion.a 
               key={social.label}
               href={social.url} 
               target="_blank"
               rel="noopener noreferrer"
               aria-label={social.label}
-              className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-[#746840] hover:text-white transition-all transform hover:-translate-y-1"
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ type: 'spring', stiffness: 200, damping: 10, delay: i * 0.1 }}
+              whileHover={{ y: -5, backgroundColor: '#746840', color: '#fff' }}
+              className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 transition-all"
             >
               <social.icon className="w-5 h-5" />
-            </a>
+            </motion.a>
           ))}
         </div>
-      </div>
+      </motion.div>
     </footer>
   );
 };
 
 export default function App() {
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 400) {
-        setShowScrollTop(true);
-      } else {
-        setShowScrollTop(false);
-      }
+      setShowScrollTop(window.scrollY > 400);
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -710,7 +1151,14 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans antialiased overflow-x-hidden scroll-smooth">
+    <div className="min-h-screen bg-white text-slate-900 font-sans antialiased overflow-x-hidden scroll-smooth selection:bg-[#746840] selection:text-white">
+      <CustomCursor />
+      {/* Scroll Progress Bar */}
+      <motion.div 
+        className="fixed top-0 left-0 right-0 h-1 bg-[#746840] z-[100] origin-left"
+        style={{ scaleX }}
+      />
+
       <Navbar />
       <main>
         <Hero />
@@ -726,30 +1174,60 @@ export default function App() {
       <div className="fixed bottom-8 right-8 z-[60] flex flex-col gap-4">
         <AnimatePresence>
           {showScrollTop && (
-            <motion.button
+            <motion.div
               initial={{ opacity: 0, scale: 0.5, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.5, y: 20 }}
-              onClick={scrollToTop}
-              className="bg-white text-[#746840] p-4 rounded-full shadow-2xl border border-slate-100 hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all"
-              aria-label="Voltar ao topo"
+              className="relative group"
             >
-              <ArrowUp className="w-6 h-6" />
-            </motion.button>
+              {/* Progress Ring */}
+              <svg className="absolute -inset-1 w-14 h-14 -rotate-90 pointer-events-none">
+                <motion.circle
+                  cx="28"
+                  cy="28"
+                  r="24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="transparent"
+                  className="text-[#746840]/20"
+                />
+                <motion.circle
+                  cx="28"
+                  cy="28"
+                  r="24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="transparent"
+                  strokeDasharray="150.796"
+                  style={{ pathLength: scrollYProgress }}
+                  className="text-[#746840]"
+                />
+              </svg>
+              
+              <button
+                onClick={scrollToTop}
+                className="bg-white text-[#746840] w-12 h-12 rounded-full shadow-2xl border border-slate-100 flex items-center justify-center hover:bg-slate-50 hover:scale-110 active:scale-95 transition-all relative z-10"
+                aria-label="Voltar ao topo"
+              >
+                <ArrowUp className="w-5 h-5" />
+              </button>
+            </motion.div>
           )}
         </AnimatePresence>
 
         {/* Floating WhatsApp Button */}
-        <motion.a 
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="bg-[#25D366] text-white p-4 rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all"
-        >
-          <MessageSquare className="w-6 h-6" />
-        </motion.a>
+        <MagneticButton>
+          <motion.a 
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-[#25D366] text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
+          >
+            <MessageSquare className="w-5 h-5" />
+          </motion.a>
+        </MagneticButton>
       </div>
     </div>
   );
