@@ -26,9 +26,122 @@ import {
   ArrowUp,
   Cpu,
   Zap,
-  ShieldCheck
+  ShieldCheck,
+  Award,
+  Truck,
+  Gamepad2,
+  Bot,
+  Car,
+  Home,
+  Users,
+  Volume2
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'motion/react';
+
+const useSound = () => {
+  const [audioCtx, setAudioCtx] = useState<AudioContext | null>(null);
+
+  useEffect(() => {
+    const initAudio = () => {
+      if (!audioCtx) {
+        setAudioCtx(new (window.AudioContext || (window as any).webkitAudioContext)());
+      }
+    };
+    window.addEventListener('click', initAudio, { once: true });
+    return () => window.removeEventListener('click', initAudio);
+  }, [audioCtx]);
+
+  const playSound = (type: 'hover' | 'click' | 'success' | 'welcome') => {
+    if (!audioCtx) return;
+
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    // Browser-dependent frequency mapping
+    const ua = navigator.userAgent.toLowerCase();
+    let baseFreq = 440; // Default A4
+    
+    if (ua.includes('chrome') && !ua.includes('edg')) {
+      baseFreq = 880; // Chrome: A5 (High & Crisp)
+    } else if (ua.includes('firefox')) {
+      baseFreq = 659; // Firefox: E5 (Warm & Mid)
+    } else if (ua.includes('safari') && !ua.includes('chrome')) {
+      baseFreq = 523; // Safari: C5 (Elegant & Low)
+    } else if (ua.includes('edg')) {
+      baseFreq = 784; // Edge: G5 (Balanced)
+    }
+
+    if (type === 'hover') {
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.1);
+    } else if (type === 'click') {
+      oscillator.type = 'triangle';
+      oscillator.frequency.setValueAtTime(baseFreq * 1.5, audioCtx.currentTime);
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.2);
+    } else if (type === 'success') {
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(baseFreq * 2, audioCtx.currentTime + 0.3);
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.05);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.5);
+    } else if (type === 'welcome') {
+      oscillator.type = 'sine';
+      // Harmonic chord: base, base*1.25 (major third), base*1.5 (fifth)
+      oscillator.frequency.setValueAtTime(baseFreq, audioCtx.currentTime);
+      
+      const osc2 = audioCtx.createOscillator();
+      const osc3 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      const gain3 = audioCtx.createGain();
+      
+      osc2.type = 'sine';
+      osc3.type = 'sine';
+      osc2.frequency.setValueAtTime(baseFreq * 1.25, audioCtx.currentTime);
+      osc3.frequency.setValueAtTime(baseFreq * 1.5, audioCtx.currentTime);
+      
+      osc2.connect(gain2);
+      osc3.connect(gain3);
+      gain2.connect(audioCtx.destination);
+      gain3.connect(audioCtx.destination);
+      
+      [gainNode, gain2, gain3].forEach(g => {
+        g.gain.setValueAtTime(0, audioCtx.currentTime);
+        g.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime + 0.1);
+        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5);
+      });
+      
+      oscillator.start();
+      osc2.start();
+      osc3.start();
+      oscillator.stop(audioCtx.currentTime + 1.5);
+      osc2.stop(audioCtx.currentTime + 1.5);
+      osc3.stop(audioCtx.currentTime + 1.5);
+    }
+  };
+
+  useEffect(() => {
+    if (audioCtx) {
+      playSound('welcome');
+    }
+  }, [audioCtx]);
+
+  return playSound;
+};
 
 const TextReveal = ({ text, className = "" }: { text: string, className?: string }) => {
   const words = text.split(" ");
@@ -171,6 +284,7 @@ const CustomCursor = () => {
 };
 
 const Navbar = () => {
+  const playSound = useSound();
   return (
     <motion.nav 
       initial={{ y: -100 }}
@@ -181,6 +295,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <motion.div 
           whileHover={{ scale: 1.05 }}
+          onMouseEnter={() => playSound('hover')}
           className="flex items-center space-x-2 cursor-pointer"
         >
           <img 
@@ -199,6 +314,7 @@ const Navbar = () => {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + i * 0.1 }}
+              onMouseEnter={() => playSound('hover')}
               className="hover:text-[#746840] transition-colors relative group"
             >
               {item}
@@ -209,6 +325,8 @@ const Navbar = () => {
         <motion.a 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
+          onMouseEnter={() => playSound('hover')}
+          onClick={() => playSound('click')}
           href="https://wa.me/244938325192" 
           target="_blank" 
           rel="noopener noreferrer"
@@ -432,6 +550,211 @@ const Hero = () => {
           <div className="w-px h-12 bg-gradient-to-b from-slate-300 to-transparent"></div>
         </motion.div>
       </motion.div>
+    </section>
+  );
+};
+
+const Diferenciais = () => {
+  const benefits = [
+    {
+      icon: ShieldCheck,
+      title: "Garantia Oficial",
+      desc: "Todos os nossos produtos eletrónicos possuem garantia certificada e suporte pós-venda.",
+      color: "bg-amber-50 text-amber-600"
+    },
+    {
+      icon: Truck,
+      title: "Entrega em 24h",
+      desc: "Logística ágil para toda a província de Luanda. O seu produto na mão em tempo recorde.",
+      color: "bg-blue-50 text-blue-600"
+    },
+    {
+      icon: Award,
+      title: "Suporte Especializado",
+      desc: "Equipa técnica pronta para configurar e dar suporte a todos os seus dispositivos.",
+      color: "bg-emerald-50 text-emerald-600"
+    }
+  ];
+
+  return (
+    <section className="py-12 bg-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {benefits.map((item, i) => (
+            <motion.div
+              key={item.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -5 }}
+              className="p-8 rounded-3xl bg-slate-50 border border-slate-100 flex flex-col items-center text-center group transition-all hover:shadow-xl hover:shadow-slate-200/50"
+            >
+              <div className={`w-16 h-16 ${item.color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                <item.icon className="w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">{item.title}</h3>
+              <p className="text-slate-500 leading-relaxed">{item.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const ProductCard: React.FC<{ product: any; i: number }> = ({ product, i }) => {
+  const playSound = useSound();
+  const mouseX = useSpring(0, { stiffness: 150, damping: 20 });
+  const mouseY = useSpring(0, { stiffness: 150, damping: 20 });
+
+  const imgX = useTransform(mouseX, [-200, 200], [-15, 15]);
+  const imgY = useTransform(mouseY, [-200, 200], [-15, 15]);
+  
+  const rotateX = useTransform(mouseY, [-200, 200], [5, -5]);
+  const rotateY = useTransform(mouseX, [-200, 200], [-5, 5]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: i * 0.1 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => playSound('hover')}
+      style={{ 
+        rotateX, 
+        rotateY, 
+        transformStyle: "preserve-3d",
+        perspective: 1000,
+        scrollSnapAlign: 'start' 
+      }}
+      whileHover={{ 
+        y: -15,
+        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.15)",
+        borderColor: "rgba(116, 104, 64, 0.2)"
+      }}
+      className="min-w-[300px] md:min-w-[350px] bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 group cursor-pointer transition-colors duration-300"
+    >
+      <div className="relative h-64 overflow-hidden">
+        <motion.img 
+          src={product.image} 
+          alt={product.name}
+          style={{ 
+            x: imgX, 
+            y: imgY, 
+            scale: 1.2,
+          }}
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute top-4 left-4" style={{ transform: "translateZ(30px)" }}>
+          <div className="bg-white/90 backdrop-blur-sm p-2 rounded-xl shadow-sm">
+            <product.icon className="w-5 h-5 text-[#746840]" />
+          </div>
+        </div>
+      </div>
+      <div className="p-8" style={{ transform: "translateZ(20px)" }}>
+        <span className="text-xs font-bold text-[#746840] uppercase tracking-widest mb-2 block">{product.category}</span>
+        <h3 className="text-xl font-bold text-slate-900 mb-4">{product.name}</h3>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-slate-500">Disponível</span>
+          <motion.div 
+            whileHover={{ scale: 1.1 }}
+            className="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center text-[#746840] group-hover:bg-[#746840] group-hover:text-white transition-colors"
+          >
+            <ArrowRight className="w-5 h-5" />
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const ProductShowcase = () => {
+  const products = [
+    {
+      name: "Hoverboard",
+      category: "Mobilidade",
+      image: "https://i.postimg.cc/qNr9Lxms/1773868591054.png",
+      icon: Zap
+    },
+    {
+      name: "Iphone 15 pro Max",
+      category: "Smartphone",
+      image: "https://i.postimg.cc/mtsXf2QL/1773867005918.png",
+      icon: Smartphone
+    },
+    {
+      name: "Samsung s24 ultra",
+      category: "Smartphone",
+      image: "https://i.postimg.cc/4mgLkNzZ/1773868266257.png",
+      icon: Smartphone
+    },
+    {
+      name: "playstation",
+      category: "Consola",
+      image: "https://i.postimg.cc/K4LqHggy/1773868440218.png",
+      icon: Gamepad2
+    },
+    {
+      name: "google pixel 8",
+      category: "Smartphone",
+      image: "https://i.postimg.cc/GHC7whkb/1773868448441.png",
+      icon: Smartphone
+    }
+  ];
+
+  return (
+    <section id="produtos" className="py-24 bg-slate-50 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 mb-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="max-w-2xl">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-block px-4 py-1.5 bg-[#746840]/10 rounded-full mb-4"
+            >
+              <span className="text-[#746840] text-xs font-bold uppercase tracking-widest">Showcase</span>
+            </motion.div>
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">Vitrine de Tecnologia</h2>
+            <p className="text-slate-600">Explore os equipamentos mais desejados do mercado, prontos para entrega imediata em Luanda.</p>
+          </div>
+          <motion.a
+            href="#contacto"
+            whileHover={{ x: 5 }}
+            className="flex items-center gap-2 text-[#746840] font-bold cursor-pointer group"
+          >
+            Saber Mais <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </motion.a>
+        </div>
+      </div>
+
+      <div className="relative">
+        <motion.div 
+          className="flex gap-6 px-6 overflow-x-auto pb-12 no-scrollbar"
+          style={{ scrollSnapType: 'x mandatory' }}
+        >
+          {products.map((product, i) => (
+            <ProductCard key={product.name} product={product} i={i} />
+          ))}
+        </motion.div>
+      </div>
     </section>
   );
 };
@@ -779,6 +1102,7 @@ const Testimonials = () => {
 };
 
 const Contact = () => {
+  const playSound = useSound();
   const [formState, setFormState] = useState({
     name: '',
     email: '',
@@ -789,6 +1113,7 @@ const Contact = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted:', formState);
+    playSound('success');
     setIsSubmitted(true);
     setFormState({ name: '', email: '', message: '' });
   };
@@ -1000,6 +1325,208 @@ const Contact = () => {
   );
 };
 
+const Partners = () => {
+  const [activeStory, setActiveStory] = useState(0);
+  
+  const successStories = [
+    {
+      title: "Venda de SUV de Luxo",
+      description: "Intermediamos a venda de um Range Rover em menos de 15 dias, garantindo o melhor preço para o proprietário e segurança para o comprador.",
+      client: "João M., Proprietário",
+      type: "Automóvel"
+    },
+    {
+      title: "Apartamento no Talatona",
+      description: "Publicitámos e gerimos as visitas de um T3 premium. Resultado: contrato assinado na primeira semana de exposição.",
+      client: "Dra. Carla, Investidora",
+      type: "Imobiliário"
+    },
+    {
+      title: "Frota Empresarial",
+      description: "Ajudámos uma empresa local a renovar a sua frota, vendendo 5 viaturas antigas através da nossa rede de contactos em tempo recorde.",
+      client: "Logística Express, Empresa",
+      type: "Automóvel"
+    }
+  ];
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveStory((prev) => (prev + 1) % successStories.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <section id="parceiros" className="py-24 bg-slate-50 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center mb-20">
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+          >
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-block px-4 py-1.5 bg-[#746840]/10 rounded-full mb-6"
+            >
+              <span className="text-[#746840] text-xs font-bold uppercase tracking-widest">Parceiros & Corretagem</span>
+            </motion.div>
+            
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-8 tracking-tight">
+              Intermediação de <span className="text-[#746840]">Confiança</span>
+            </h2>
+            
+            <div className="space-y-6 text-slate-600 text-lg leading-relaxed mb-10">
+              <p>
+                A Maicol Express não é apenas uma loja de eletrónicos. Atuamos orgulhosamente como uma <strong>corretora especializada</strong>, facilitando a ponte entre proprietários e compradores em Luanda.
+              </p>
+              <p>
+                A nossa missão é garantir que artigos de alto valor, como <strong>veículos e imóveis</strong>, sejam publicitados e vendidos com a máxima transparência, segurança e rapidez que o mercado exige.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-10">
+              <div className="flex items-start gap-4 p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-[#746840]/10 flex items-center justify-center shrink-0">
+                  <motion.div
+                    animate={{ x: [0, 3, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Car className="w-6 h-6 text-[#746840]" />
+                  </motion.div>
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 mb-1">Automóveis</h4>
+                  <p className="text-sm text-slate-500">Publicidade e venda de veículos de terceiros com inspeção de confiança.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-[#746840]/10 flex items-center justify-center shrink-0">
+                  <motion.div
+                    animate={{ y: [0, -3, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Home className="w-6 h-6 text-[#746840]" />
+                  </motion.div>
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 mb-1">Imobiliário</h4>
+                  <p className="text-sm text-slate-500">Mediação de casas e terrenos em localizações estratégicas de Luanda.</p>
+                </div>
+              </div>
+            </div>
+
+            <motion.a
+              href="#contacto"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="inline-flex items-center gap-3 bg-[#746840] text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-[#746840]/20 transition-all group"
+            >
+              Quero ser Parceiro
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </motion.a>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: 'spring', stiffness: 50, damping: 20 }}
+            className="relative"
+          >
+            <div className="absolute -inset-4 bg-[#746840]/5 blur-3xl rounded-full"></div>
+            <div className="relative bg-white p-4 rounded-[3rem] shadow-2xl border border-slate-100">
+              <img 
+                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1000" 
+                alt="Business Partnership" 
+                className="w-full h-[500px] object-cover rounded-[2.5rem]"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute bottom-12 -left-8 bg-white p-6 rounded-2xl shadow-xl border border-slate-100 max-w-[200px] hidden md:block">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                    <ShieldCheck className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="font-bold text-sm">Segurança Total</span>
+                </div>
+                <p className="text-xs text-slate-500">Processos auditados e transparentes para ambas as partes.</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Success Stories Carousel */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-white rounded-[3rem] p-8 md:p-12 shadow-xl border border-slate-100 relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+            <Quote className="w-32 h-32 text-[#746840]" />
+          </div>
+          
+          <div className="relative z-10">
+            <div className="flex items-center gap-4 mb-8">
+              <div className="h-px w-12 bg-[#746840]/30"></div>
+              <span className="text-[#746840] font-bold text-sm uppercase tracking-widest">Casos de Sucesso</span>
+            </div>
+
+            <div className="min-h-[200px] flex flex-col justify-center">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeStory}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="px-3 py-1 bg-slate-100 rounded-full text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
+                      {successStories[activeStory].type}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-4">
+                    {successStories[activeStory].title}
+                  </h3>
+                  <p className="text-slate-600 text-lg md:text-xl italic mb-8 max-w-4xl leading-relaxed">
+                    "{successStories[activeStory].description}"
+                  </p>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-full bg-[#746840]/10 flex items-center justify-center">
+                      <Users className="w-6 h-6 text-[#746840]" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-slate-900">{successStories[activeStory].client}</p>
+                      <p className="text-sm text-slate-500">Parceria Maicol Express</p>
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            <div className="flex gap-2 mt-12">
+              {successStories.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveStory(idx)}
+                  className={`h-1.5 transition-all duration-300 rounded-full ${
+                    activeStory === idx ? 'w-8 bg-[#746840]' : 'w-2 bg-slate-200'
+                  }`}
+                  aria-label={`Go to story ${idx + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
@@ -1015,6 +1542,10 @@ const FAQ = () => {
     {
       question: "Como funcionam os vossos serviços de Soluções Digitais?",
       answer: "Oferecemos criação e gestão de websites modernos, bem como gestão estratégica de redes sociais para elevar a presença digital e a autoridade do seu negócio no mercado."
+    },
+    {
+      question: "A Maicol Express também vende carros e imóveis?",
+      answer: "Sim! Atuamos como corretora especializada na venda e publicidade de artigos de terceiros, nomeadamente veículos e imóveis em Luanda, garantindo uma mediação segura e profissional."
     }
   ];
 
@@ -1162,9 +1693,12 @@ export default function App() {
       <Navbar />
       <main>
         <Hero />
+        <Diferenciais />
         <Services />
+        <ProductShowcase />
         <About />
         <Testimonials />
+        <Partners />
         <FAQ />
         <Contact />
       </main>
