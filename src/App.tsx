@@ -209,7 +209,7 @@ const Navbar = () => {
         <motion.a 
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" 
+          href="https://wa.me/244938325192" 
           target="_blank" 
           rel="noopener noreferrer"
           className="bg-[#746840] text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-[#5a5132] transition-all shadow-md shadow-[#746840]/20"
@@ -331,7 +331,7 @@ const Hero = () => {
           variants={itemVariants}
           className="max-w-2xl mx-auto text-lg text-slate-600 mb-10"
         >
-          Oferecemos soluções eletrónicas de alta performance e consultoria digital especializada em Morro Bento, Luanda.
+          Oferecemos soluções eletrónicas de alta performance e consultoria digital especializada em Luanda-Angola.
         </motion.p>
         
         <motion.div 
@@ -502,9 +502,9 @@ const Services = () => {
                 <Smartphone className="text-[#746840] w-6 h-6" />
               </motion.div>
               <h3 className="text-2xl font-bold mb-4">Venda de Eletrónicos</h3>
-              <p className="text-slate-600 mb-6">Equipamentos de última geração. iPhones, PCs de Alta Performance e consoles PS5 prontos para entrega imediata.</p>
+              <p className="text-slate-600 mb-6">Equipamentos de última geração: iPhone, Samsung e Google pixel, Overboards, Robôs, Playstations e outros prontos para entrega imediata.</p>
               <div className="flex flex-wrap gap-2">
-                {['Apple', 'Gaming Gear', 'Workstations'].map((tag) => (
+                {['Smartphones', 'Overboards', 'Robôs', 'Playstations'].map((tag) => (
                   <motion.span 
                     key={tag} 
                     whileHover={{ scale: 1.1, backgroundColor: '#746840', color: '#fff' }}
@@ -642,7 +642,7 @@ const About = () => {
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
               {[
-                { icon: Smartphone, title: 'Hardware', desc: 'iPhones, PCs & PS5' },
+                { icon: Smartphone, title: 'Hardware', desc: 'iPhone, Samsung, Pixel, PS5 & Robôs' },
                 { icon: Code, title: 'Digital', desc: 'Web & Redes Sociais' }
               ].map((item, i) => (
                 <motion.div 
@@ -692,7 +692,7 @@ const About = () => {
                 loading="lazy" 
                 allowFullScreen 
                 referrerPolicy="no-referrer-when-downgrade"
-                src="https://www.google.com/maps?q=Frente%20ao%20ENAPP,%20Morro%20Bento,%20Luanda&output=embed"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3941.9458250637313!2d13.185346299999999!3d-8.884629199999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1a51f5e3909ca9d3%3A0x4ebc1346e83afd95!2sMaicol-Express!5e0!3m2!1spt-PT!2sao!4v1773864698472!5m2!1spt-PT!2sao"
                 className="grayscale group-hover:grayscale-0 transition-all duration-700"
               ></iframe>
               <div className="absolute inset-0 pointer-events-none border-[12px] border-white/10 rounded-[2.5rem]"></div>
@@ -837,7 +837,7 @@ const Contact = () => {
             <div className="flex flex-col gap-6 mb-12">
               {[
                 { icon: Smartphone, label: 'Telefone', value: '+244 938 325 192', href: 'tel:+244938325192', color: 'hover:text-[#746840]', bg: 'group-hover:bg-[#746840]/20', border: 'group-hover:border-[#746840]/30' },
-                { icon: MessageCircle, label: 'WhatsApp', value: 'Atendimento Imediato', href: 'https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn', color: 'hover:text-[#25D366]', bg: 'group-hover:bg-[#25D366]/20', border: 'group-hover:border-[#25D366]/30' },
+                { icon: MessageCircle, label: 'WhatsApp', value: 'Atendimento Imediato', href: 'https://wa.me/244938325192', color: 'hover:text-[#25D366]', bg: 'group-hover:bg-[#25D366]/20', border: 'group-hover:border-[#25D366]/30' },
                 { icon: MapPin, label: 'Localização', value: 'Morro Bento, Luanda', href: null }
               ].map((item, i) => (
                 <motion.div
@@ -1006,7 +1006,7 @@ const FAQ = () => {
   const faqs = [
     {
       question: "Quais são os principais produtos eletrónicos que vendem?",
-      answer: "Vendemos iPhones de última geração, PCs de alta performance e consolas PlayStation 5, todos prontos para entrega imediata e com garantia de qualidade."
+      answer: "Comercializamos uma vasta gama de produtos premium, incluindo iPhone, Samsung e Google pixel, Overboards, Robôs, Playstations e muito mais, todos com garantia de qualidade."
     },
     {
       question: "Onde está localizada a loja física da Maicol-Express?",
@@ -1220,7 +1220,7 @@ export default function App() {
           <motion.a 
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            href="https://chat.whatsapp.com/EKNBhJdL0at2AeLX4NxtTn" 
+            href="https://wa.me/244938325192" 
             target="_blank" 
             rel="noopener noreferrer"
             className="bg-[#25D366] text-white w-12 h-12 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
