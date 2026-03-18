@@ -34,7 +34,9 @@ import {
   Car,
   Home,
   Users,
-  Volume2
+  Volume2,
+  ShoppingBag,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'motion/react';
 
@@ -682,6 +684,127 @@ const ProductCard: React.FC<{ product: any; i: number }> = ({ product, i }) => {
         </div>
       </div>
     </motion.div>
+  );
+};
+
+const AppDevelopmentSection = () => {
+  const playSound = useSound();
+  
+  const categories = [
+    {
+      title: "Apps de Mobilidade",
+      desc: "Soluções completas para transporte, entregas e logística em tempo real com rastreamento preciso.",
+      icon: Car,
+      color: "from-blue-500 to-indigo-600",
+      features: ["Rastreamento GPS", "Pagamentos In-App", "Gestão de Frotas"]
+    },
+    {
+      title: "E-commerce & Retail",
+      desc: "Plataformas de venda robustas com experiência de compra otimizada e gestão de inventário.",
+      icon: ShoppingBag,
+      color: "from-emerald-500 to-teal-600",
+      features: ["Catálogo Inteligente", "Checkout Seguro", "Gestão de Stock"]
+    },
+    {
+      title: "Sistemas Customizados",
+      desc: "Transformamos qualquer ideia complexa em realidade digital funcional e escalável.",
+      icon: Globe,
+      color: "from-purple-500 to-pink-600",
+      features: ["Arquitetura Escalável", "Integração API", "Design UX/UI"]
+    }
+  ];
+
+  return (
+    <section className="py-24 bg-slate-50 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-8">
+          <div className="max-w-2xl">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="inline-block px-4 py-1.5 bg-[#746840]/10 rounded-full mb-6 border border-[#746840]/20"
+            >
+              <span className="text-[#746840] text-xs font-bold uppercase tracking-widest">Desenvolvimento de Apps</span>
+            </motion.div>
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 leading-[1.1]">
+              Trazemos a sua <span className="text-[#746840]">Ideia</span> à Vida Digital.
+            </h2>
+          </div>
+          <p className="text-slate-500 text-lg max-w-md">
+            Da mobilidade urbana ao comércio eletrónico global, a Maicol Express desenvolve aplicações que definem o futuro do seu negócio.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {categories.map((cat, i) => (
+            <motion.div
+              key={cat.title}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.2 }}
+              onMouseEnter={() => playSound('hover')}
+              className="group relative bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/50 hover:shadow-2xl hover:shadow-slate-300/50 transition-all duration-500"
+            >
+              <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-white mb-8 group-hover:scale-110 transition-transform duration-500 shadow-lg`}>
+                <cat.icon className="w-8 h-8" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-slate-900 mb-4">{cat.title}</h3>
+              <p className="text-slate-500 mb-8 leading-relaxed">
+                {cat.desc}
+              </p>
+
+              <ul className="space-y-3">
+                {cat.features.map(feat => (
+                  <li key={feat} className="flex items-center gap-3 text-sm font-medium text-slate-700">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#746840]" />
+                    {feat}
+                  </li>
+                ))}
+              </ul>
+
+              <motion.div 
+                className="absolute top-8 right-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                animate={{ x: [0, 5, 0] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
+                <ArrowRight className="w-6 h-6 text-slate-300" />
+              </motion.div>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-16 p-12 rounded-[4rem] bg-slate-900 text-white relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#746840]/20 blur-[100px] rounded-full -z-0 group-hover:scale-125 transition-transform duration-700" />
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="max-w-xl">
+              <h3 className="text-3xl md:text-4xl font-bold mb-6">Tem um projeto complexo em mente?</h3>
+              <p className="text-slate-400 text-lg">
+                Não importa o quão ambiciosa seja a sua visão. A nossa equipa de engenheiros e designers está pronta para construir a infraestrutura digital que a sua empresa merece.
+              </p>
+            </div>
+            <motion.a
+              href="#contacto"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onMouseEnter={() => playSound('hover')}
+              onClick={() => playSound('click')}
+              className="px-10 py-5 bg-[#746840] text-white rounded-2xl font-bold text-lg shadow-2xl shadow-[#746840]/40 flex items-center gap-3 whitespace-nowrap"
+            >
+              Começar Agora <ArrowRight className="w-5 h-5" />
+            </motion.a>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   );
 };
 
@@ -1695,6 +1818,7 @@ export default function App() {
         <Hero />
         <Diferenciais />
         <Services />
+        <AppDevelopmentSection />
         <ProductShowcase />
         <About />
         <Testimonials />
